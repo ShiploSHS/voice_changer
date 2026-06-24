@@ -1,0 +1,46 @@
+{
+  "info": {
+    "name": "Voice Cloner REST API",
+    "_postman_id": "2a5f1458-9e4d-4f8e-8a8f-c0c8f6635edf",
+    "description": "Postman collection for testing the Django voice conversion REST API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Convert audio",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "audio",
+              "type": "file",
+              "src": "{{audio_file_path}}",
+              "description": "Select an audio file to convert."
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/api/convert/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "convert"
+          ],
+          "variable": [
+            {
+              "key": "base_url",
+              "value": "http://127.0.0.1:8000"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": []
+}
