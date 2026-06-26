@@ -40,6 +40,78 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Upload voice profile",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "profile_name",
+              "type": "text",
+              "value": "my_voice_profile",
+              "description": "Name for the voice profile."
+            },
+            {
+              "key": "audio",
+              "type": "file",
+              "src": "{{profile_audio_path}}",
+              "description": "Upload your voice sample WAV or MP3 file."
+            },
+            {
+              "key": "preferred_tts_voice",
+              "type": "text",
+              "value": "",
+              "description": "Optional system TTS voice name or id to use for this profile."
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/api/profile/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "profile"
+          ],
+          "variable": [
+            {
+              "key": "base_url",
+              "value": "http://127.0.0.1:8000"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get active voice profile",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/profile/active/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "profile",
+            "active"
+          ],
+          "variable": [
+            {
+              "key": "base_url",
+              "value": "http://127.0.0.1:8000"
+            }
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "event": []
