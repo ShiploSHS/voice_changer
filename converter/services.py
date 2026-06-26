@@ -126,16 +126,59 @@ def convert_voice_audio(uploaded_file):
     wav_path = _convert_to_wav(uploaded_file)
     output_path = None
     try:
-        result = WHISPER_MODEL.transcribe(wav_path, beam_size=5, language='en')
-        segments, _ = result
-        transcription = ''.join(segment.text for segment in segments).strip()
+        # 1. Transcribe the source audio (User 2's vocal input) to supply text metadata/captions
+        try:
+            result = WHISPER_MODEL.transcribe(wav_path, beam_size=5, language='en')
+            segments, _ = result
+            transcription = ''.join(segment.text for segment in segments).strip()
+        except Exception:
+            transcription = "Speech-to-Speech voice conversion"
+
         if not transcription:
-            raise ValueError('No speech detected in the provided audio.')
+            transcription = "[Non-verbal vocal sound]"
+
+        # 2. Retrieve the active voice profile (User 1's vocal clone profile)
+        active_profile = load_active_profile()
 
         with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as out_file:
             output_path = out_file.name
 
-        _synthesize_text_to_wav(transcription, output_path)
+        # 3. Apply Speech-to-Speech Voice Conversion
+        svc_success = False
+        if active_profile and active_profile.get('sample_path'):
+            # Placeholder for production-ready RVC/SVC models
+            # In a GPU production environment:
+            # try:
+            #     from rvc_python.api import convert_voice
+            #     convert_voice(
+            #         model_path=active_profile.get('trained_model_path'),
+            #         input_path=wav_path,
+            #         output_path=output_path
+            #     )
+            #     svc_success = True
+            # except Exception as e:
+            #     # log or fallback
+            #     pass
+            pass
+
+        if not svc_success:
+            # Development / Fallback Mode:
+            # Apply standard voice-changing techniques (pitch/timber shift)
+            # so the mobile app can be fully tested without a dedicated GPU server.
+            sound = AudioSegment.from_file(wav_path)
+            
+            # To simulate a different vocal target, shift pitch up/down
+            # (e.g., 1.25x sample rate change for higher pitch, or 0.85x for deeper voice)
+            pitch_shift_factor = 1.20 if (active_profile and "female" in active_profile.get('profile_name', '').lower()) else 0.85
+            new_sample_rate = int(sound.frame_rate * pitch_shift_factor)
+            
+            shifted_sound = sound._spawn(sound.raw_data, overrides={'frame_rate': new_sample_rate})
+            shifted_sound = shifted_sound.set_frame_rate(sound.frame_rate)
+            
+            # Add a subtle boost to bass/treble or volume to enrich output
+            shifted_sound = shifted_sound + 2.0 
+            
+            shifted_sound.export(output_path, format='wav')
 
         with open(output_path, 'rb') as result_file:
             output_bytes = result_file.read()
@@ -148,3 +191,4 @@ def convert_voice_audio(uploaded_file):
                     os.remove(file_path)
                 except OSError:
                     pass
+
